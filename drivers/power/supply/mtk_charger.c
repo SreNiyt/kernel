@@ -1610,6 +1610,9 @@ static int charger_routine_thread(void *arg)
 		chr_debug("%s end , %d\n",
 			__func__, info->charger_thread_timeout);
 		mutex_unlock(&info->charger_lock);
+                if (info->charger_thread_timeout == true) {
+                        msleep(500); // Sleep 500ms if it's looping instantly
+                }
 	}
 
 	return 0;
