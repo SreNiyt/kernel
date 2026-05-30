@@ -56,6 +56,8 @@
 #include <linux/of_irq.h>
 #include <linux/of_address.h>
 #include <linux/reboot.h>
+#include <linux/jiffies.h>
+
 
 #include "mtk_charger.h"
 
@@ -471,6 +473,12 @@ static void mtk_charger_start_timer(struct mtk_charger *info)
 	struct timespec time, time_now;
 	ktime_t ktime;
 	int ret = 0;
+
+        /* Get current time to check if timer is already set for the future */
+        get_monotonic_boottime(&time_now);
+        if (timespec_compare(&info->endtime, &time_now) > 0) {
+                return;
+        }
 
 	/* If the timer was already set, cancel it */
 	ret = alarm_try_to_cancel(&info->charger_timer);
@@ -1546,6 +1554,13 @@ static int charger_routine_thread(void *arg)
 		wait_event(info->wait_que,
 			(info->charger_thread_timeout == true));
 
+                /* If it ran less than 500ms ago, sleep and skip the heavy logic */
+                if (last_run_jiffies != 0 && time_before(jiffies, last_run_jiffies + msecs_to_jiffies(500))) {
+                        info->charger_thread_timeout = false;
+                        msleep(100);
+                        continue;
+                }
+
 		while (is_module_init_done == false) {
 			if (charger_init_algo(info) == true)
 				is_module_init_done = true;
@@ -1610,9 +1625,6 @@ static int charger_routine_thread(void *arg)
 		chr_debug("%s end , %d\n",
 			__func__, info->charger_thread_timeout);
 		mutex_unlock(&info->charger_lock);
-                if (info->charger_thread_timeout == true) {
-                        msleep(500); // Sleep 500ms if it's looping instantly
-                }
 	}
 
 	return 0;
