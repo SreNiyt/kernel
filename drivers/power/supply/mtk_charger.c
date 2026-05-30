@@ -1549,6 +1549,7 @@ static int charger_routine_thread(void *arg)
 	unsigned long flags;
 	static bool is_module_init_done;
 	bool is_charger_on;
+        static unsigned long last_run_jiffies = 0;
 
 	while (1) {
 		wait_event(info->wait_que,
