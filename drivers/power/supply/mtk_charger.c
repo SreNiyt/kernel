@@ -15,7 +15,7 @@
  *
  * Description:
  * ------------
- *   This Module defines functions of Battery charging
+ *   This Module defines functions of Battery charging 
  *
  * Author:
  * -------
