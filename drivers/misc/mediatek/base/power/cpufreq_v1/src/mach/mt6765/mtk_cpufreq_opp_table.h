@@ -1592,22 +1592,22 @@ static struct mt_cpu_freq_method opp_tbl_method_CCI_C65[] = {
 /* C62 */
 static struct mt_cpu_freq_method opp_tbl_method_L_C62[] = {
 	/* POS,	CLK */
-	FP(1,	1),
-	FP(1,	1),
-	FP(1,	1),
-	FP(1,	1),
-	FP(1,	1),
-	FP(1,	1),
-	FP(1,	1),
-	FP(1,	1),
-	FP(1,	1),
-	FP(1,	1),
-	FP(2,	1),
-	FP(2,	1),
-	FP(2,	1),
-	FP(2,	1),
-	FP(2,	1),
-	FP(2,	1),
+        FP(1,   1),
+        FP(1,   1),
+        FP(1,   1),
+        FP(1,   2),
+        FP(2,   1),
+        FP(2,   1),
+        FP(2,   1),
+        FP(2,   1),
+        FP(2,   1),
+        FP(2,   1),
+        FP(2,   2),
+        FP(2,   2),
+        FP(2,   2),
+        FP(2,   2),
+        FP(2,   2),
+        FP(2,   4),
 };
 
 static struct mt_cpu_freq_method opp_tbl_method_LL_C62[] = {
