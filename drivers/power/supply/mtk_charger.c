@@ -1625,7 +1625,6 @@ static int charger_routine_thread(void *arg)
 		spin_unlock_irqrestore(&info->slock, flags);
 		chr_debug("%s end , %d\n",
 			__func__, info->charger_thread_timeout);
-                msleep(2000);
 		mutex_unlock(&info->charger_lock);
 	}
 
@@ -2141,8 +2140,9 @@ static int mtk_charger_probe(struct platform_device *pdev)
 	}
 
 	info->log_level = CHRLOG_DEBUG_LEVEL;
-
+        /* commenting this out since my phone has some hw issue
 	info->pd_adapter = get_adapter_by_name("pd_adapter");
+
 	if (!info->pd_adapter)
 		chr_err("%s: No pd adapter found\n");
 	else {
@@ -2152,7 +2152,7 @@ static int mtk_charger_probe(struct platform_device *pdev)
 	}
 
 	info->chg_alg_nb.notifier_call = chg_alg_event;
-
+        */
 	kthread_run(charger_routine_thread, info, "charger_thread");
 
 	return 0;
