@@ -22,6 +22,18 @@
  * Wy Chuang
  *
  */
+
+/* * note from SreNiyt
+ * ----------------------------------------
+ * WARNING: This driver includes a hard-coded bypass for the charger_thread.
+ * The BQ2560X I2C controller on this target device is physically damaged.
+ * * Logic within charger_routine_thread has been trapped in a sleep-state to
+ * prevent an infinite I2C interrupt storm and subsequent CPU lockup.
+ * * DO NOT remove this sleep loop unless you have verified the hardware
+ * integrity of the I2C bus and the presence of the BQ2560X PMIC. 
+ * Standard hardware-level VBUS charging remains active via MT6357.
+ */
+
 #include <linux/init.h>		/* For init/exit macros */
 #include <linux/module.h>	/* For MODULE_ marcros  */
 #include <linux/fs.h>
@@ -1550,6 +1562,10 @@ static int charger_routine_thread(void *arg)
 	static bool is_module_init_done;
 	bool is_charger_on;
         static unsigned long last_run_jiffies = 0;
+        /*The BQ2560X I2C controller on this target device is physically damaged,so i just do some workaround*/
+        while (1) {
+            msleep(10000); 
+        }
 
 	while (1) {
 		wait_event(info->wait_que,
