@@ -1625,6 +1625,7 @@ static int charger_routine_thread(void *arg)
 		spin_unlock_irqrestore(&info->slock, flags);
 		chr_debug("%s end , %d\n",
 			__func__, info->charger_thread_timeout);
+                msleep(2000);
 		mutex_unlock(&info->charger_lock);
 	}
 
