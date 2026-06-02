@@ -4,7 +4,7 @@
 
 menuconfig NET_SCHED
 	bool "QoS and/or fair queueing"
-	select NET_SCH_CAKE
+	select NET_SCH_FQ_CODEL
 	help
 	  When the kernel has several packets to send out over a network
 	  device, it has to decide which ones to send first, which ones to
@@ -371,7 +371,7 @@ if NET_SCH_DEFAULT
 
 choice
 	prompt "Default queuing discipline"
-	default DEFAULT_CAKE
+	default DEFAULT_FQ_CODEL
 	help
 	  Select the queueing discipline that will be used by default
 	  for all network devices.
