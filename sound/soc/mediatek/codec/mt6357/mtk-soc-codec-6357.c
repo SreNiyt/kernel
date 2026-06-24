@@ -4095,28 +4095,25 @@ static int Headset_PGAL_Get(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 static int Headset_PGAL_Set(struct snd_kcontrol *kcontrol,
-			    struct snd_ctl_elem_value *ucontrol)
+                            struct snd_ctl_elem_value *ucontrol)
 {
-	int index = ucontrol->value.integer.value[0];
-	int old_idx =
-		mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTL];
+    int index = 0; 
+    int old_idx = mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTL];
 
-	if (index >= ARRAY_SIZE(DAC_DL_PGA_Headset_GAIN)) {
-		pr_debug("return -EINVAL\n");
-		return -EINVAL;
-	}
-	if (index == (ARRAY_SIZE(DAC_DL_PGA_Headset_GAIN) - 1))
-		index = DL_GAIN_N_40DB;
-	mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTL] = index;
-	mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTR] = index;
-	if (mCodec_data->mAudio_Ana_DevicePower
-		[AUDIO_ANALOG_DEVICE_OUT_HEADSETL]) {
-		headset_volume_ramp(old_idx, index);
+    if (index >= ARRAY_SIZE(DAC_DL_PGA_Headset_GAIN)) {
+        return -EINVAL;
+    }
+
+    mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTL] = index;
+    mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTR] = index;
+
+    if (mCodec_data->mAudio_Ana_DevicePower[AUDIO_ANALOG_DEVICE_OUT_HEADSETL]) {
+        headset_volume_ramp(old_idx, index);
 #ifndef ANALOG_HPTRIM
-		SetDcCompenSation(true);
+        SetDcCompenSation(true);
 #endif
-	}
-	return 0;
+    }
+    return 0;
 }
 static int Headset_PGAR_Get(struct snd_kcontrol *kcontrol,
 			    struct snd_ctl_elem_value *ucontrol)
@@ -4132,29 +4129,27 @@ static int Headset_PGAR_Get(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 static int Headset_PGAR_Set(struct snd_kcontrol *kcontrol,
-			    struct snd_ctl_elem_value *ucontrol)
+                            struct snd_ctl_elem_value *ucontrol)
 {
-	int index = ucontrol->value.integer.value[0];
-	int old_idx =
-		mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTR];
+    int index = 0;
+    int old_idx = mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTR];
 
-	pr_debug("%s(), index = %d\n", __func__, index);
-	if (index >= ARRAY_SIZE(DAC_DL_PGA_Headset_GAIN)) {
-		pr_debug("return -EINVAL\n");
-		return -EINVAL;
-	}
-	if (index == (ARRAY_SIZE(DAC_DL_PGA_Headset_GAIN) - 1))
-		index = DL_GAIN_N_40DB;
-	mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTL] = index;
-	mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTR] = index;
-	if (mCodec_data->mAudio_Ana_DevicePower
-		[AUDIO_ANALOG_DEVICE_OUT_HEADSETR]) {
-		headset_volume_ramp(old_idx, index);
+    if (index >= ARRAY_SIZE(DAC_DL_PGA_Headset_GAIN)) {
+           return -EINVAL;
+    }
+    if (index == (ARRAY_SIZE(DAC_DL_PGA_Headset_GAIN) - 1))
+           index = DL_GAIN_N_40DB;
+
+    mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTL] = index;
+    mCodec_data->mAudio_Ana_Volume[AUDIO_ANALOG_VOLUME_HPOUTR] = index;
+
+    if (mCodec_data->mAudio_Ana_DevicePower[AUDIO_ANALOG_DEVICE_OUT_HEADSETR]) {
+           headset_volume_ramp(old_idx, index);
 #ifndef ANALOG_HPTRIM
-		SetDcCompenSation(true);
+           SetDcCompenSation(true);
 #endif
-	}
-	return 0;
+    }
+    return 0;
 }
 static int codec_adc_sample_rate_get(struct snd_kcontrol *kcontrol,
 				     struct snd_ctl_elem_value *ucontrol)
