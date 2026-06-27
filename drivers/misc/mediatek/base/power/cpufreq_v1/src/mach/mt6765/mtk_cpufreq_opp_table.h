@@ -490,23 +490,23 @@
 #define CPU_DVFS_FREQ15_CCI_C62    150000    /* KHz */
 
 /* for DVFS OPP table */
-#define CPU_DVFS_VOLT0_VPROC_L_C62    105500    /* 10uV */
-#define CPU_DVFS_VOLT1_VPROC_L_C62    102500    /* 10uV */
-#define CPU_DVFS_VOLT2_VPROC_L_C62    100000    /* 10uV */
-#define CPU_DVFS_VOLT3_VPROC_L_C62     96500    /* 10uV */
-#define CPU_DVFS_VOLT4_VPROC_L_C62     92500    /* 10uV */
-#define CPU_DVFS_VOLT5_VPROC_L_C62     90000    /* 10uV */
-#define CPU_DVFS_VOLT6_VPROC_L_C62     87500    /* 10uV */
-#define CPU_DVFS_VOLT7_VPROC_L_C62     85000    /* 10uV */
-#define CPU_DVFS_VOLT8_VPROC_L_C62     82500    /* 10uV */
-#define CPU_DVFS_VOLT9_VPROC_L_C62     80000    /* 10uV */
-#define CPU_DVFS_VOLT10_VPROC_L_C62    75000    /* 10uV */
-#define CPU_DVFS_VOLT11_VPROC_L_C62    72500    /* 10uV */
-#define CPU_DVFS_VOLT12_VPROC_L_C62    70000    /* 10uV */
-#define CPU_DVFS_VOLT13_VPROC_L_C62    67500    /* 10uV */
-#define CPU_DVFS_VOLT14_VPROC_L_C62    62500    /* 10uV */
-#define CPU_DVFS_VOLT15_VPROC_L_C62    60000    /* 10uV */
-
+#define CPU_DVFS_VOLT0_VPROC_L_C62    110375    /* 10uV */
+#define CPU_DVFS_VOLT1_VPROC_L_C62    107125    /* 10uV */
+#define CPU_DVFS_VOLT2_VPROC_L_C62    104875    /* 10uV */
+#define CPU_DVFS_VOLT3_VPROC_L_C62    102625    /* 10uV */
+#define CPU_DVFS_VOLT4_VPROC_L_C62     98950    /* 10uV */
+#define CPU_DVFS_VOLT5_VPROC_L_C62     95125    /* 10uV */
+#define CPU_DVFS_VOLT6_VPROC_L_C62     92750    /* 10uV */
+#define CPU_DVFS_VOLT7_VPROC_L_C62     90250    /* 10uV */
+#define CPU_DVFS_VOLT8_VPROC_L_C62     87875    /* 10uV */
+#define CPU_DVFS_VOLT9_VPROC_L_C62     85125    /* 10uV */
+#define CPU_DVFS_VOLT10_VPROC_L_C62    82625    /* 10uV */
+#define CPU_DVFS_VOLT11_VPROC_L_C62    77850    /* 10uV */
+#define CPU_DVFS_VOLT12_VPROC_L_C62    75375    /* 10uV */
+#define CPU_DVFS_VOLT13_VPROC_L_C62    72925    /* 10uV */
+#define CPU_DVFS_VOLT14_VPROC_L_C62    67875    /* 10uV */
+#define CPU_DVFS_VOLT15_VPROC_L_C62    60250    /* 10uV */
+	
 #define CPU_DVFS_VOLT0_VPROC_LL_C62    106250          /* 10uV */
 #define CPU_DVFS_VOLT1_VPROC_LL_C62    103125          /* 10uV */
 #define CPU_DVFS_VOLT2_VPROC_LL_C62    100000          /* 10uV */
