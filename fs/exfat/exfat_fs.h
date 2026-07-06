@@ -9,6 +9,8 @@
 #include <linux/fs.h>
 #include <linux/ratelimit.h>
 #include <linux/nls.h>
+#include <linux/blkdev.h>
+#include <linux/backing-dev.h>
 
 #define EXFAT_SUPER_MAGIC       0x2011BAB0UL
 #define EXFAT_ROOT_INO		1
@@ -74,6 +76,9 @@ enum {
 
 #define EXFAT_HINT_NONE		-1
 #define EXFAT_MIN_SUBDIR	2
+#define EXFAT_BLK_RA_SIZE(sb) \
+(min((sb)->s_bdi->ra_pages, (sb)->s_bdi->io_pages) \
+        << (PAGE_SHIFT - (sb)->s_blocksize_bits))
 
 /*
  * helpers for cluster size to byte conversion.

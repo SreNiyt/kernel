@@ -134,22 +134,59 @@ int exfat_ent_get(struct super_block *sb, unsigned int loc,
 	return 0;
 }
 
-int exfat_chain_cont_cluster(struct super_block *sb, unsigned int chain,
-		unsigned int len)
+static void exfat_blk_readahead(struct super_block *sb, sector_t sec,
+                sector_t *ra, blkcnt_t *ra_cnt, sector_t end)
 {
-	if (!len)
-		return 0;
+        struct blk_plug plug;
 
-	while (len > 1) {
-		if (exfat_ent_set(sb, chain, chain + 1))
-			return -EIO;
-		chain++;
-		len--;
-	}
+        if (sec < *ra)
+                return;
 
-	if (exfat_ent_set(sb, chain, EXFAT_EOF_CLUSTER))
-		return -EIO;
-	return 0;
+        *ra += *ra_cnt;
+
+        if (*ra >= end)
+                return;
+
+        *ra_cnt = min(end - *ra + 1, EXFAT_BLK_RA_SIZE(sb));
+        if (*ra_cnt == 0) {
+                *ra = end;
+                return;
+        }
+
+        blk_start_plug(&plug);
+        for (unsigned int i = 0; i < *ra_cnt; i++)
+                sb_breadahead(sb, *ra + i);
+        blk_finish_plug(&plug);
+}
+
+int exfat_chain_cont_cluster(struct super_block *sb, unsigned int chain,
+                unsigned int len)
+{
+        sector_t sec, end, ra;
+        blkcnt_t ra_cnt;
+
+        if (!len)
+                return 0;
+
+        ra_cnt = 0;
+        ra = FAT_ENT_OFFSET_SECTOR(sb, chain);
+        end = FAT_ENT_OFFSET_SECTOR(sb, chain + len - 1);
+
+        while (len > 1) {
+                sec = FAT_ENT_OFFSET_SECTOR(sb, chain);
+                exfat_blk_readahead(sb, sec, &ra, &ra_cnt, end);
+
+                if (exfat_ent_set(sb, chain, chain + 1))
+                        return -EIO;
+
+                chain++;
+                len--;
+        }
+
+        if (exfat_ent_set(sb, chain, EXFAT_EOF_CLUSTER))
+                return -EIO;
+
+        return 0;
 }
 
 int exfat_free_cluster(struct inode *inode, struct exfat_chain *p_chain)
