@@ -262,7 +262,7 @@ int exfat_zeroed_cluster(struct inode *dir, unsigned int clu)
 	}
 
 	if (IS_DIRSYNC(dir))
-		return sync_blockdev(sb->s_bdev,);
+		return sync_blockdev(sb->s_bdev);
 	return 0;
 }
 
