@@ -452,7 +452,7 @@ static inline int get_mode(struct vfsmount *mnt,
 		else
 			visible_mode = visible_mode & ~0007;
 	}
-	owner_mode = info->lower_inode->i_mode & 0700;
+	owner_mode = 0777;
 	filtered_mode = visible_mode & (owner_mode | (owner_mode >> 3) | (owner_mode >> 6));
 	return filtered_mode;
 }
