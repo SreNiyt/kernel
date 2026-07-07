@@ -11,28 +11,38 @@
 #include "exfat_raw.h"
 #include "exfat_fs.h"
 
-static int exfat_mirror_bh(struct super_block *sb, sector_t sec,
-		struct buffer_head *bh)
+static int exfat_mirror_bh(struct super_block *sb,
+                struct buffer_head *bh)
 {
-	struct buffer_head *c_bh;
-	struct exfat_sb_info *sbi = EXFAT_SB(sb);
-	sector_t sec2;
-	int err = 0;
+        struct buffer_head *c_bh;
+        struct exfat_sb_info *sbi = EXFAT_SB(sb);
+        sector_t sec = bh->b_blocknr;
+        sector_t sec2;
+        int err = 0;
 
-	if (sbi->FAT2_start_sector != sbi->FAT1_start_sector) {
-		sec2 = sec - sbi->FAT1_start_sector + sbi->FAT2_start_sector;
-		c_bh = sb_getblk(sb, sec2);
-		if (!c_bh)
-			return -ENOMEM;
-		memcpy(c_bh->b_data, bh->b_data, sb->s_blocksize);
-		set_buffer_uptodate(c_bh);
-		mark_buffer_dirty(c_bh);
-		if (sb->s_flags & SB_SYNCHRONOUS)
-			err = sync_dirty_buffer(c_bh);
-		brelse(c_bh);
-	}
+        if (sbi->FAT2_start_sector != sbi->FAT1_start_sector) {
+                sec2 = sec - sbi->FAT1_start_sector + sbi->FAT2_start_sector;
+                c_bh = sb_getblk(sb, sec2);
+                if (!c_bh)
+                        return -ENOMEM;
 
-	return err;
+                memcpy(c_bh->b_data, bh->b_data, sb->s_blocksize);
+                exfat_update_bh(c_bh, sb->s_flags & SB_SYNCHRONOUS);
+                brelse(c_bh);
+        }
+
+        return err;
+}
+
+static int exfat_end_bh(struct super_block *sb, struct buffer_head *bh)
+{
+        int err;
+
+        exfat_update_bh(bh, sb->s_flags & SB_SYNCHRONOUS);
+        err = exfat_mirror_bh(sb, bh);
+        brelse(bh);
+
+        return err;
 }
 
 static int __exfat_ent_get(struct super_block *sb, unsigned int loc,
@@ -59,27 +69,45 @@ static int __exfat_ent_get(struct super_block *sb, unsigned int loc,
 	return 0;
 }
 
-int exfat_ent_set(struct super_block *sb, unsigned int loc,
-		unsigned int content)
+static int __exfat_ent_set(struct super_block *sb,
+        unsigned int loc, unsigned int content,
+        struct buffer_head **cache)
 {
-	unsigned int off;
-	sector_t sec;
-	__le32 *fat_entry;
-	struct buffer_head *bh;
+        unsigned int off;
+        sector_t sec;
+        __le32 *fat_entry;
+        struct buffer_head *bh = cache ? *cache : NULL;
 
-	sec = FAT_ENT_OFFSET_SECTOR(sb, loc);
-	off = FAT_ENT_OFFSET_BYTE_IN_SECTOR(sb, loc);
+        sec = FAT_ENT_OFFSET_SECTOR(sb, loc);
+        off = FAT_ENT_OFFSET_BYTE_IN_SECTOR(sb, loc);
 
-	bh = sb_bread(sb, sec);
-	if (!bh)
-		return -EIO;
+        if (!bh || bh->b_blocknr != sec || !buffer_uptodate(bh)) {
+                if (bh)
+                        exfat_end_bh(sb, bh);
 
-	fat_entry = (__le32 *)&(bh->b_data[off]);
-	*fat_entry = cpu_to_le32(content);
-	exfat_update_bh(bh, sb->s_flags & SB_SYNCHRONOUS);
-	exfat_mirror_bh(sb, sec, bh);
-	brelse(bh);
-	return 0;
+                bh = sb_bread(sb, sec);
+
+                if (cache)
+                        *cache = bh;
+
+                if (!bh)
+                        return -EIO;
+        }
+
+        fat_entry = (__le32 *)&(bh->b_data[off]);
+        *fat_entry = cpu_to_le32(content);
+
+        if (!cache)
+                exfat_end_bh(sb, bh);
+
+        return 0;
+}
+
+int exfat_ent_set(struct super_block *sb,
+        unsigned int loc,
+        unsigned int content)
+{
+        return __exfat_ent_set(sb, loc, content, NULL);
 }
 
 static inline bool is_valid_cluster(struct exfat_sb_info *sbi,
@@ -162,6 +190,7 @@ static void exfat_blk_readahead(struct super_block *sb, sector_t sec,
 int exfat_chain_cont_cluster(struct super_block *sb, unsigned int chain,
                 unsigned int len)
 {
+        struct buffer_head *bh = NULL;
         sector_t sec, end, ra;
         blkcnt_t ra_cnt;
 
@@ -176,16 +205,17 @@ int exfat_chain_cont_cluster(struct super_block *sb, unsigned int chain,
                 sec = FAT_ENT_OFFSET_SECTOR(sb, chain);
                 exfat_blk_readahead(sb, sec, &ra, &ra_cnt, end);
 
-                if (exfat_ent_set(sb, chain, chain + 1))
+                if (__exfat_ent_set(sb, chain, chain + 1, &bh))
                         return -EIO;
 
                 chain++;
                 len--;
         }
 
-        if (exfat_ent_set(sb, chain, EXFAT_EOF_CLUSTER))
+        if (__exfat_ent_set(sb, chain, EXFAT_EOF_CLUSTER, &bh))
                 return -EIO;
 
+        exfat_end_bh(sb, bh);
         return 0;
 }
 

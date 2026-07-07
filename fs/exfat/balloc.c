@@ -51,7 +51,8 @@ static int exfat_allocate_bitmap(struct super_block *sb,
 	struct exfat_sb_info *sbi = EXFAT_SB(sb);
 	long long map_size;
 	unsigned int i, need_map_size;
-	sector_t sector;
+	unsigned int ra_cnt = 0;
+	sector_t sector, ra, end;
 
 	sbi->map_clu = le32_to_cpu(ep->dentry.bitmap.start_clu);
 	map_size = le64_to_cpu(ep->dentry.bitmap.size);
@@ -71,12 +72,12 @@ static int exfat_allocate_bitmap(struct super_block *sb,
 			(sb->s_blocksize_bits)) + 1;
 	sbi->vol_amap = kmalloc_array(sbi->map_sectors,
 				sizeof(struct buffer_head *), GFP_KERNEL);
-	if (!sbi->vol_amap)
-		return -ENOMEM;
-
 	sector = exfat_cluster_to_sector(sbi, sbi->map_clu);
+	ra = sector;
+	end = sector + sbi->map_sectors - 1;
 	for (i = 0; i < sbi->map_sectors; i++) {
-		sbi->vol_amap[i] = sb_bread(sb, sector + i);
+	        exfat_blk_readahead(sb, sector + i, &ra, &ra_cnt, end);
+	        sbi->vol_amap[i] = sb_bread(sb, sector + i);
 		if (!sbi->vol_amap[i]) {
 			/* release all buffers and free vol_amap */
 			int j = 0;
