@@ -164,7 +164,7 @@ int exfat_ent_get(struct super_block *sb, unsigned int loc,
 	return 0;
 }
 
-static void exfat_blk_readahead(struct super_block *sb, sector_t sec,
+void exfat_blk_readahead(struct super_block *sb, sector_t sec,
                 sector_t *ra, blkcnt_t *ra_cnt, sector_t end)
 {
         struct blk_plug plug;

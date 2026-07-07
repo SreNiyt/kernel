@@ -51,7 +51,7 @@ static int exfat_allocate_bitmap(struct super_block *sb,
 	struct exfat_sb_info *sbi = EXFAT_SB(sb);
 	long long map_size;
 	unsigned int i, need_map_size;
-	unsigned int ra_cnt = 0;
+	blkcnt_t ra_cnt = 0;
 	sector_t sector, ra, end;
 
 	sbi->map_clu = le32_to_cpu(ep->dentry.bitmap.start_clu);

@@ -468,6 +468,8 @@ struct exfat_entry_set_cache *exfat_get_dentry_set(struct super_block *sb,
 		struct exfat_chain *p_dir, int entry, unsigned int type);
 int exfat_free_dentry_set(struct exfat_entry_set_cache *es, int sync);
 int exfat_count_dir_entries(struct super_block *sb, struct exfat_chain *p_dir);
+void exfat_blk_readahead(struct super_block *sb, sector_t sec,
+                sector_t *ra, blkcnt_t *ra_cnt, sector_t end);
 
 /* inode.c */
 extern const struct inode_operations exfat_file_inode_operations;

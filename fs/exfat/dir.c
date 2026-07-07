@@ -695,7 +695,7 @@ struct exfat_dentry *exfat_get_dentry(struct super_block *sb,
 	if (sect_per_clus > 1 &&
 		(entry & (dentries_per_page - 1)) == 0) {
         sector_t ra = sec;
-        unsigned int cnt = 0;
+        blkcnt_t  cnt = 0;
         unsigned int ra_count = sect_per_clus;
 
         /* Not sector aligned with ra_count, resize ra_count to page size */
