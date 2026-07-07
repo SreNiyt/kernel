@@ -163,13 +163,17 @@ u32 exfat_calc_chksum32(void *data, int len, u32 chksum, int type)
 	return chksum;
 }
 
-void exfat_update_bh(struct buffer_head *bh, int sync)
+int exfat_update_bh(struct buffer_head *bh, int sync)
 {
-	set_buffer_uptodate(bh);
-	mark_buffer_dirty(bh);
+        int err = 0;
 
-	if (sync)
-		sync_dirty_buffer(bh);
+        set_buffer_uptodate(bh);
+        mark_buffer_dirty(bh);
+
+        if (sync)
+                err = sync_dirty_buffer(bh);
+
+        return err;
 }
 
 int exfat_update_bhs(struct buffer_head **bhs, int nr_bhs, int sync)
