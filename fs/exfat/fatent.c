@@ -47,28 +47,48 @@ static int exfat_end_bh(struct super_block *sb, struct buffer_head *bh)
         return err;
 }
 
-static int __exfat_ent_get(struct super_block *sb, unsigned int loc,
-		unsigned int *content)
+static int __exfat_ent_get(struct super_block *sb,
+        unsigned int loc,
+        unsigned int *content,
+        struct buffer_head **cache)
 {
-	unsigned int off;
-	sector_t sec;
-	struct buffer_head *bh;
+        unsigned int off;
+        sector_t sec;
+        struct buffer_head *bh = cache ? *cache : NULL;
 
-	sec = FAT_ENT_OFFSET_SECTOR(sb, loc);
-	off = FAT_ENT_OFFSET_BYTE_IN_SECTOR(sb, loc);
+        sec = FAT_ENT_OFFSET_SECTOR(sb, loc);
+        off = FAT_ENT_OFFSET_BYTE_IN_SECTOR(sb, loc);
 
-	bh = sb_bread(sb, sec);
-	if (!bh)
-		return -EIO;
+        if (!bh || bh->b_blocknr != sec || !buffer_uptodate(bh)) {
+                if (bh)
+                        brelse(bh);
 
-	*content = le32_to_cpu(*(__le32 *)(&bh->b_data[off]));
+                bh = sb_bread(sb, sec);
 
-	/* remap reserved clusters to simplify code */
-	if (*content > EXFAT_BAD_CLUSTER)
-		*content = EXFAT_EOF_CLUSTER;
+                if (cache)
+                        *cache = bh;
 
-	brelse(bh);
-	return 0;
+                if (!bh)
+                        return -EIO;
+        }
+
+        *content = le32_to_cpu(*(__le32 *)&bh->b_data[off]);
+
+        if (*content > EXFAT_BAD_CLUSTER)
+                *content = EXFAT_EOF_CLUSTER;
+
+        if (!cache)
+                brelse(bh);
+
+        return 0;
+}
+
+int exfat_ent_get_cached(struct super_block *sb,
+        unsigned int loc,
+        unsigned int *content,
+        struct buffer_head **cache)
+{
+        return __exfat_ent_get(sb, loc, content, cache);
 }
 
 static int __exfat_ent_set(struct super_block *sb,
@@ -132,7 +152,7 @@ int exfat_ent_get(struct super_block *sb, unsigned int loc,
 		return -EIO;
 	}
 
-	err = __exfat_ent_get(sb, loc, content);
+	err = __exfat_ent_get(sb, loc, content, NULL);
 	if (err) {
 		exfat_fs_error(sb,
 			"failed to access to FAT (entry 0x%08x, err:%d)",

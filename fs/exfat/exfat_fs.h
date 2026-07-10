@@ -408,6 +408,10 @@ int exfat_find_last_cluster(struct super_block *sb, struct exfat_chain *p_chain,
 		unsigned int *ret_clu);
 int exfat_count_num_clusters(struct super_block *sb,
 		struct exfat_chain *p_chain, unsigned int *ret_count);
+int exfat_ent_get_cached(struct super_block *,
+        unsigned int,
+        unsigned int *,
+        struct buffer_head **);
 
 /* balloc.c */
 int exfat_load_bitmap(struct super_block *sb);

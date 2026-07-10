@@ -17,7 +17,7 @@
 #include "exfat_raw.h"
 #include "exfat_fs.h"
 
-#define EXFAT_MAX_CACHE		16
+#define EXFAT_MAX_CACHE		64
 
 struct exfat_cache {
 	struct list_head cache_list;
@@ -243,11 +243,13 @@ int exfat_get_cluster(struct inode *inode, unsigned int cluster,
 	struct exfat_inode_info *ei = EXFAT_I(inode);
 	struct exfat_cache_id cid;
 	unsigned int content;
+	struct buffer_head *fat_bh = NULL;
 
 	if (ei->start_clu == EXFAT_FREE_CLUSTER) {
 		exfat_fs_error(sb,
 			"invalid access to exfat cache (entry 0x%08x)",
 			ei->start_clu);
+		brelse(fat_bh);
 		return -EIO;
 	}
 
@@ -258,9 +260,10 @@ int exfat_get_cluster(struct inode *inode, unsigned int cluster,
 	/*
 	 * Don`t use exfat_cache if zero offset or non-cluster allocation
 	 */
-	if (cluster == 0 || *dclus == EXFAT_EOF_CLUSTER)
+	if (cluster == 0 || *dclus == EXFAT_EOF_CLUSTER) {
+		brelse(fat_bh);
 		return 0;
-
+	}
 	cache_init(&cid, EXFAT_EOF_CLUSTER, EXFAT_EOF_CLUSTER);
 
 	if (exfat_cache_lookup(inode, cluster, &cid, fclus, dclus) ==
@@ -275,20 +278,24 @@ int exfat_get_cluster(struct inode *inode, unsigned int cluster,
 			cid.nr_contig != 0);
 	}
 
-	if (*fclus == cluster)
+	if (*fclus == cluster) {
+		brelse(fat_bh);
 		return 0;
-
+	}
 	while (*fclus < cluster) {
 		/* prevent the infinite loop of cluster chain */
 		if (*fclus > limit) {
 			exfat_fs_error(sb,
 				"detected the cluster chain loop (i_pos %u)",
 				(*fclus));
+			brelse(fat_bh);
 			return -EIO;
 		}
 
-		if (exfat_ent_get(sb, *dclus, &content))
-			return -EIO;
+		if (exfat_ent_get_cached(sb, *dclus, &content, &fat_bh)) {
+		        brelse(fat_bh);
+		        return -EIO;
+			}
 
 		*last_dclus = *dclus;
 		*dclus = content;
@@ -299,6 +306,7 @@ int exfat_get_cluster(struct inode *inode, unsigned int cluster,
 				exfat_fs_error(sb,
 				       "invalid cluster chain (i_pos %u, last_clus 0x%08x is EOF)",
 				       *fclus, (*last_dclus));
+				brelse(fat_bh);
 				return -EIO;
 			}
 
@@ -310,5 +318,6 @@ int exfat_get_cluster(struct inode *inode, unsigned int cluster,
 	}
 
 	exfat_cache_add(inode, &cid);
+	brelse(fat_bh);
 	return 0;
 }
