@@ -201,8 +201,6 @@ void exfat_chain_set(struct exfat_chain *ec, unsigned int dir,
 	ec->dir = dir;
 	ec->size = size;
 	ec->flags = flags;
-	ec->hint_clu = dir;
-	ec->hint_off = 0;
 }
 
 void exfat_chain_dup(struct exfat_chain *dup, struct exfat_chain *ec)

@@ -149,10 +149,6 @@ struct exfat_chain {
 	unsigned int dir;
 	unsigned int size;
 	unsigned char flags;
-
-	/* FAT walk hint */
-        unsigned int hint_clu;
-        unsigned int hint_off;
 };
 
 /* first empty entry hint information */
