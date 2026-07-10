@@ -626,7 +626,12 @@ static int exfat_walk_fat_chain(struct super_block *sb,
 	unsigned int cur_clu;
 
 	clu_offset = EXFAT_B_TO_CLU(byte_offset, sbi);
-	cur_clu = p_dir->dir;
+	if (clu_offset >= p_dir->hint_off) {
+	        cur_clu = p_dir->hint_clu;
+	        clu_offset -= p_dir->hint_off;
+	} else {
+	        cur_clu = p_dir->dir;
+	}
 
 	if (p_dir->flags == ALLOC_NO_FAT_CHAIN) {
 		cur_clu += clu_offset;
@@ -645,6 +650,8 @@ static int exfat_walk_fat_chain(struct super_block *sb,
 		}
 	}
 
+	p_dir->hint_clu = cur_clu;
+	p_dir->hint_off = EXFAT_B_TO_CLU(byte_offset, sbi);
 	*clu = cur_clu;
 	return 0;
 }
