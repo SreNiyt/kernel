@@ -696,14 +696,18 @@ struct exfat_dentry *exfat_get_dentry(struct super_block *sb,
 		(entry & (dentries_per_page - 1)) == 0) {
         sector_t ra = sec;
         blkcnt_t  cnt = 0;
-        unsigned int ra_count = sect_per_clus;
+        unsigned int ra_count = max(sect_per_clus,
+	        (unsigned int)(PAGE_SIZE >> sb->s_blocksize_bits));
 
-        /* Not sector aligned with ra_count, resize ra_count to page size */
-        if ((sec - sbi->data_start_sector) & (ra_count - 1))
-                ra_count = PAGE_SIZE >> sb->s_blocksize_bits;
+	/* Read ahead two windows instead of one */
+	ra_count <<= 1;
 
-        exfat_blk_readahead(sb, sec, &ra, &cnt,
-                            sec + ra_count - 1);
+	/* Prevent ridiculous values */
+	if (ra_count > 64)
+	        ra_count = 64;
+
+	exfat_blk_readahead(sb, sec, &ra, &cnt,
+        	            sec + ra_count - 1);
 }
 
 	*bh = sb_bread(sb, sec);
