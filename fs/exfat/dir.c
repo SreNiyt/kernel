@@ -971,6 +971,8 @@ rewind:
 
 			if (entry_type == TYPE_FILE || entry_type == TYPE_DIR) {
 				step = DIRENT_STEP_FILE;
+				hint_opt->clu = clu.dir;
+				hint_opt->eidx = i;
 				if (type == TYPE_ALL || type == entry_type) {
 					num_ext = ep->dentry.file.num_ext;
 					step = DIRENT_STEP_STRM;
@@ -1139,6 +1141,8 @@ int exfat_count_dir_entries(struct super_block *sb, struct exfat_chain *p_dir)
 	dentries_per_clu = sbi->dentries_per_clu;
 
 	exfat_chain_dup(&clu, p_dir);
+	hint_opt->clu = p_dir->dir;
+	hint_opt->eidx = 0;
 
 	while (clu.dir != EXFAT_EOF_CLUSTER) {
 		for (i = 0; i < dentries_per_clu; i++) {
