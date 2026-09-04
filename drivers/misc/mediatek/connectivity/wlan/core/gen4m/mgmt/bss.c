@@ -2148,17 +2148,17 @@ void bssInitForAP(IN struct ADAPTER *prAdapter, IN struct BSS_INFO *prBssInfo,
 
 	enum ENUM_WMM_ACI eAci;
 
-	uint8_t auCWminLog2ForBcast[WMM_AC_INDEX_NUM] = { 4, 4, 3, 2 };
-	uint8_t auCWmaxLog2ForBcast[WMM_AC_INDEX_NUM] = { 10, 10, 4, 3 };
-	uint8_t auAifsForBcast[WMM_AC_INDEX_NUM] = { 3, 7, 2, 2 };
+	uint8_t auCWminLog2ForBcast[WMM_AC_INDEX_NUM] = { 3, 4, 3, 2 };
+	uint8_t auCWmaxLog2ForBcast[WMM_AC_INDEX_NUM] = { 4, 10, 4, 3 };
+	uint8_t auAifsForBcast[WMM_AC_INDEX_NUM] = { 2, 7, 2, 2 };
 	/* If the AP is OFDM */
-	uint8_t auTxopForBcast[WMM_AC_INDEX_NUM] = { 0, 0, 94, 47 };
+	uint8_t auTxopForBcast[WMM_AC_INDEX_NUM] = { 47, 0, 94, 47 };
 
-	uint8_t auCWminLog2[WMM_AC_INDEX_NUM] = { 4, 4, 3, 2 };
-	uint8_t auCWmaxLog2[WMM_AC_INDEX_NUM] = { 6, 10, 4, 3 };
-	uint8_t auAifs[WMM_AC_INDEX_NUM] = { 3, 7, 1, 1 };
+	uint8_t auCWminLog2[WMM_AC_INDEX_NUM] = { 3, 4, 3, 2 };
+	uint8_t auCWmaxLog2[WMM_AC_INDEX_NUM] = { 4, 10, 4, 3 };
+	uint8_t auAifs[WMM_AC_INDEX_NUM] = { 2, 7, 1, 1 };
 	/* If the AP is OFDM */
-	uint8_t auTxop[WMM_AC_INDEX_NUM] = { 0, 0, 94, 47 };
+	uint8_t auTxop[WMM_AC_INDEX_NUM] = { 47, 0, 94, 47 };
 
 	DEBUGFUNC("bssInitForAP");
 

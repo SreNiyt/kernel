@@ -6317,11 +6317,11 @@ uint32_t mqmGenerateWmmParamIEByParam(struct ADAPTER *prAdapter,
 
 	struct AC_QUE_PARMS *prACQueParms;
 	/* BE, BK, VO, VI */
-	uint8_t auCWminLog2ForBcast[WMM_AC_INDEX_NUM] = {4, 4, 3, 2};
-	uint8_t auCWmaxLog2ForBcast[WMM_AC_INDEX_NUM] = {10, 10, 4, 3};
-	uint8_t auAifsForBcast[WMM_AC_INDEX_NUM] = {3, 7, 2, 2};
+	uint8_t auCWminLog2ForBcast[WMM_AC_INDEX_NUM] = {3, 4, 3, 2};
+	uint8_t auCWmaxLog2ForBcast[WMM_AC_INDEX_NUM] = {4, 10, 4, 3};
+	uint8_t auAifsForBcast[WMM_AC_INDEX_NUM] = {2, 7, 2, 2};
 	/* If the AP is OFDM */
-	uint8_t auTxopForBcast[WMM_AC_INDEX_NUM] = {0, 0, 94, 47};
+	uint8_t auTxopForBcast[WMM_AC_INDEX_NUM] = {47, 0, 94, 47};
 
 	enum ENUM_WMM_ACI eAci;
 	struct WMM_AC_PARAM *prAcParam;
