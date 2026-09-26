@@ -472,21 +472,21 @@
 #define CPU_DVFS_FREQ15_LL_C62    400000    /* KHz */
 
 /* for DVFS OPP table CCI */
-#define CPU_DVFS_FREQ0_CCI_C62    1048000    /* KHz */
-#define CPU_DVFS_FREQ1_CCI_C62     997000    /* KHz */
-#define CPU_DVFS_FREQ2_CCI_C62     953000    /* KHz */
-#define CPU_DVFS_FREQ3_CCI_C62     915000    /* KHz */
-#define CPU_DVFS_FREQ4_CCI_C62     877000    /* KHz */
-#define CPU_DVFS_FREQ5_CCI_C62     839000    /* KHz */
-#define CPU_DVFS_FREQ6_CCI_C62     801000    /* KHz */
-#define CPU_DVFS_FREQ7_CCI_C62     763000    /* KHz */
-#define CPU_DVFS_FREQ8_CCI_C62     724000    /* KHz */
-#define CPU_DVFS_FREQ9_CCI_C62     658000    /* KHz */
-#define CPU_DVFS_FREQ10_CCI_C62    592000    /* KHz */
-#define CPU_DVFS_FREQ11_CCI_C62    525000    /* KHz */
-#define CPU_DVFS_FREQ12_CCI_C62    459000    /* KHz */
-#define CPU_DVFS_FREQ13_CCI_C62    392000    /* KHz */
-#define CPU_DVFS_FREQ14_CCI_C62    339000    /* KHz */
+#define CPU_DVFS_FREQ0_CCI_C62    1148000    /* KHz */
+#define CPU_DVFS_FREQ1_CCI_C62    1086000    /* KHz */
+#define CPU_DVFS_FREQ2_CCI_C62    1024000    /* KHz */
+#define CPU_DVFS_FREQ3_CCI_C62     967000    /* KHz */
+#define CPU_DVFS_FREQ4_CCI_C62     911000    /* KHz */
+#define CPU_DVFS_FREQ5_CCI_C62     846000    /* KHz */
+#define CPU_DVFS_FREQ6_CCI_C62     792000    /* KHz */
+#define CPU_DVFS_FREQ7_CCI_C62     747000    /* KHz */
+#define CPU_DVFS_FREQ8_CCI_C62     693000    /* KHz */
+#define CPU_DVFS_FREQ9_CCI_C62     627000    /* KHz */
+#define CPU_DVFS_FREQ10_CCI_C62    563000    /* KHz */
+#define CPU_DVFS_FREQ11_CCI_C62    491000    /* KHz */
+#define CPU_DVFS_FREQ12_CCI_C62    417000    /* KHz */
+#define CPU_DVFS_FREQ13_CCI_C62    361000    /* KHz */
+#define CPU_DVFS_FREQ14_CCI_C62    329000    /* KHz */
 #define CPU_DVFS_FREQ15_CCI_C62    300000    /* KHz */
 
 /* for DVFS OPP table */
@@ -1595,19 +1595,19 @@ static struct mt_cpu_freq_method opp_tbl_method_L_C62[] = {
 	FP(1,	1),
 	FP(1,	1),
 	FP(1,	1),
-	FP(1,	2),
+	FP(1,	1),
+	FP(1,	1),
+	FP(1,	1),
+	FP(1,	1),
+	FP(1,	1),
+	FP(1,	1),
+	FP(1,	1),
 	FP(2,	1),
 	FP(2,	1),
 	FP(2,	1),
 	FP(2,	1),
 	FP(2,	1),
 	FP(2,	1),
-	FP(2,	2),
-	FP(2,	2),
-	FP(2,	2),
-	FP(2,	2),
-	FP(2,	2),
-	FP(2,	4),
 };
 
 static struct mt_cpu_freq_method opp_tbl_method_LL_C62[] = {
