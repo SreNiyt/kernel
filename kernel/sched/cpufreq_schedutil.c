@@ -634,27 +634,26 @@ static unsigned int sugov_next_freq_shared(struct sugov_cpu *sg_cpu, u64 time)
 	return next_f;
 }
 
-static void
-sugov_update_shared(struct update_util_data *hook, u64 time, unsigned int flags)
+static void sugov_update_shared(struct update_util_data *hook, u64 time,
+                                unsigned int flags)
 {
-	struct sugov_cpu *sg_cpu = container_of(hook, struct sugov_cpu, update_util);
-	struct sugov_policy *sg_policy = sg_cpu->sg_policy;
-	unsigned int next_f;
-	int cid;
+        struct sugov_cpu *sg_cpu = container_of(hook, struct sugov_cpu, update_util);
+        struct sugov_policy *sg_policy = sg_cpu->sg_policy;
+        unsigned int next_f = sg_policy->next_freq;
+        int cid;
 
-	if (!raw_spin_trylock(&sg_policy->update_lock))
-		return;
+        sugov_iowait_boost(sg_cpu, time, flags);
+        sg_cpu->last_update = time;
 
-	sugov_iowait_boost(sg_cpu, time, flags);
-	sg_cpu->last_update = time;
+        ignore_dl_rate_limit(sg_cpu, sg_policy);
 
-	ignore_dl_rate_limit(sg_cpu, sg_policy);
+        if (!raw_spin_trylock(&sg_policy->update_lock))
+                return;
 
-	cid = arch_cpu_cluster_id(sg_policy->policy->cpu);
-	next_f = sg_policy->next_freq;
+        cid = arch_cpu_cluster_id(sg_policy->policy->cpu);
 
-	if (sugov_should_update_freq(sg_policy, time)) {
-		next_f = sugov_next_freq_shared(sg_cpu, time);
+        if (sugov_should_update_freq(sg_policy, time)) {
+                next_f = sugov_next_freq_shared(sg_cpu, time);
 
 #ifdef CONFIG_MTK_TINYSYS_SSPM_SUPPORT
 		sugov_update_next_freq(sg_policy, time, next_f);
