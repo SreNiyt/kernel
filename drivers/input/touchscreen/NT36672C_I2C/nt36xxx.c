@@ -1184,24 +1184,11 @@ static int touch_event_handler(void *unused)
 				if ((input_x > ts->abs_x_max) ||
 					(input_y > ts->abs_y_max))
 					continue;
-				input_w = (uint32_t)(point_data[position + 4]);
-				if (input_w == 0)
-					input_w = 1;
-				if (i < 2) {
-					input_p =
-						(uint32_t)
-						(point_data[position + 5]) +
-						(uint32_t)
-						(point_data[i + 63] << 8);
-					if (input_p > TOUCH_FORCE_NUM)
-						input_p = TOUCH_FORCE_NUM;
-				} else {
-					input_p =
-						(uint32_t)
-						(point_data[position + 5]);
-				}
-				if (input_p == 0)
-					input_p = 1;
+    /* ====== */
+    input_w = 1;
+    input_p = 1;
+    /* ====== */
+
 
 #if MT_PROTOCOL_B
     if (press_id[input_id - 1] == 1) {
