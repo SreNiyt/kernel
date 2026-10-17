@@ -1204,6 +1204,15 @@ static int touch_event_handler(void *unused)
 					input_p = 1;
 
 #if MT_PROTOCOL_B
+    if (press_id[input_id - 1] == 1) {
+     int k;
+     for (k = 0; k < ts->max_touch_num; k++) {
+      if (press_id[k] == 0) {
+       input_id = k + 1;
+       break;
+      }
+     }
+    }
 				press_id[input_id - 1] = 1;
 				input_mt_slot(ts->input_dev, input_id - 1);
 				input_mt_report_slot_state(ts->input_dev,
