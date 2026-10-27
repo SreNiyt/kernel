@@ -7077,9 +7077,9 @@ void wlanInitFeatureOption(IN struct ADAPTER *prAdapter)
 					"P2pShareMacAddr", FEATURE_DISABLED);
 
 	prWifiVar->ucTxShortGI = (uint8_t) wlanCfgGetUint32(prAdapter, "SgiTx",
-					FEATURE_ENABLED);
+					FEATURE_DISABLED);
 	prWifiVar->ucRxShortGI = (uint8_t) wlanCfgGetUint32(prAdapter, "SgiRx",
-					FEATURE_ENABLED);
+					FEATURE_DISABLED);
 
 	prWifiVar->ucTxLdpc = (uint8_t) wlanCfgGetUint32(prAdapter, "LdpcTx",
 					FEATURE_ENABLED);
@@ -7094,9 +7094,9 @@ void wlanInitFeatureOption(IN struct ADAPTER *prAdapter)
 					"StbcRxNss", 1);
 
 	prWifiVar->ucTxGf = (uint8_t) wlanCfgGetUint32(prAdapter, "GfTx",
-					FEATURE_ENABLED);
+					FEATURE_DISABLED);
 	prWifiVar->ucRxGf = (uint8_t) wlanCfgGetUint32(prAdapter, "GfRx",
-					FEATURE_ENABLED);
+					FEATURE_DISABLED);
 
 	prWifiVar->ucMCS32 = (uint8_t) wlanCfgGetUint32(prAdapter, "MCS32",
 					FEATURE_ENABLED);
@@ -7311,11 +7311,11 @@ void wlanInitFeatureOption(IN struct ADAPTER *prAdapter)
 					prAdapter, "NetifStartTh",
 					CFG_TX_START_NETIF_PER_QUEUE_THRESHOLD);
 	prWifiVar->ucTxBaSize = (uint8_t) wlanCfgGetUint32(
-					prAdapter, "TxBaSize", 64);
+					prAdapter, "TxBaSize", 32);
 	prWifiVar->ucRxHtBaSize = (uint8_t) wlanCfgGetUint32(
-					prAdapter, "RxHtBaSize", 64);
+					prAdapter, "RxHtBaSize", 32);
 	prWifiVar->ucRxVhtBaSize = (uint8_t) wlanCfgGetUint32(
-					prAdapter, "RxVhtBaSize", 64);
+					prAdapter, "RxVhtBaSize", 32);
 #if (CFG_SUPPORT_802_11AX == 1)
 	if (fgEfuseCtrlAxOn == 1) {
 		prWifiVar->u2RxHeBaSize = (uint8_t)
@@ -7648,7 +7648,7 @@ void wlanInitFeatureOption(IN struct ADAPTER *prAdapter)
 	prWifiVar->ucLowLatencyModeReOrder = (uint32_t) wlanCfgGetUint32(
 			prAdapter, "LowLatencyModeReOrder", FEATURE_ENABLED);
 	prWifiVar->ucLowLatencyModePower = (uint32_t) wlanCfgGetUint32(
-			prAdapter, "LowLatencyModePower", FEATURE_DISABLED);
+			prAdapter, "LowLatencyModePower", FEATURE_ENABLED);
 	prWifiVar->ucLowLatencyPacketPriority = (uint32_t) wlanCfgGetUint32(
 			prAdapter, "LowLatencyPacketPriority", BITS(0, 1));
 	prWifiVar->ucLowLatencyCmdData = (uint8_t) wlanCfgGetUint32(
