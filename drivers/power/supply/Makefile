@@ -107,3 +107,5 @@ obj-$(CONFIG_MTK_PUMP_EXPRESS_PLUS_20_SUPPORT) += mtk_pe2.o mtk_pe2_hal.o
 obj-$(CONFIG_MTK_PUMP_EXPRESS_PLUS_SUPPORT) += mtk_pe.o mtk_pe_hal.o
 obj-$(CONFIG_MTK_PUMP_EXPRESS_40_SUPPORT) += mtk_pe4.o mtk_pe4_hal.o
 obj-$(CONFIG_CHARGER_MT6357) += mt6357-pulse-charger.o
+obj-$(CONFIG_CHARGER_SGM41513) += sgm41513_charger.o
+
