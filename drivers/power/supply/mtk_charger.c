@@ -2182,9 +2182,9 @@ static int mtk_charger_probe(struct platform_device *pdev)
 	}
 
 	info->chg_alg_nb.notifier_call = chg_alg_event;
-
+/* get commented bc for some reson
 	kthread_run(charger_routine_thread, info, "charger_thread");
-
+*/
 	return 0;
 }
 
