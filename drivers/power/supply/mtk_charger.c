@@ -15,25 +15,13 @@
  *
  * Description:
  * ------------
- *   This Module defines functions of Battery charging 
+ *   This Module defines functions of Battery charging
  *
  * Author:
  * -------
  * Wy Chuang
  *
  */
-
-/* * note from SreNiyt
- * ----------------------------------------
- * WARNING: This driver includes a hard-coded bypass for the charger_thread.
- * The BQ2560X I2C controller on this target device is physically damaged.
- * * Logic within charger_routine_thread has been trapped in a sleep-state to
- * prevent an infinite I2C interrupt storm and subsequent CPU lockup.
- * * DO NOT remove this sleep loop unless you have verified the hardware
- * integrity of the I2C bus and the presence of the BQ2560X PMIC. 
- * Standard hardware-level VBUS charging remains active via MT6357.
- */
-
 #include <linux/init.h>		/* For init/exit macros */
 #include <linux/module.h>	/* For MODULE_ marcros  */
 #include <linux/fs.h>
@@ -68,10 +56,11 @@
 #include <linux/of_irq.h>
 #include <linux/of_address.h>
 #include <linux/reboot.h>
-#include <linux/jiffies.h>
-
 
 #include "mtk_charger.h"
+
+bool g_charging_disabled = false;
+EXPORT_SYMBOL(g_charging_disabled);
 
 #if CONFIG_TOUCHSCREEN_COMMON
 typedef struct touchscreen_usb_piugin_data {
@@ -486,12 +475,6 @@ static void mtk_charger_start_timer(struct mtk_charger *info)
 	ktime_t ktime;
 	int ret = 0;
 
-        /* Get current time to check if timer is already set for the future */
-        get_monotonic_boottime(&time_now);
-        if (timespec_compare(&info->endtime, &time_now) > 0) {
-                return;
-        }
-
 	/* If the timer was already set, cancel it */
 	ret = alarm_try_to_cancel(&info->charger_timer);
 	if (ret < 0) {
@@ -505,8 +488,8 @@ static void mtk_charger_start_timer(struct mtk_charger *info)
 	info->endtime = timespec_add(time_now, time);
 	ktime = ktime_set(info->endtime.tv_sec, info->endtime.tv_nsec);
 
-	chr_err("%s: alarm timer start:%d, %ld %ld\n", __func__, ret,
-		info->endtime.tv_sec, info->endtime.tv_nsec);
+	chr_debug("%s: alarm timer start:%d, %ld %ld\n", __func__, ret,
+		  info->endtime.tv_sec, info->endtime.tv_nsec);
 	alarm_start(&info->charger_timer, ktime);
 }
 
@@ -899,6 +882,46 @@ static ssize_t BatteryNotify_store(struct device *dev,
 }
 
 static DEVICE_ATTR_RW(BatteryNotify);
+
+/* charging_enabled sysfs node */
+static ssize_t charging_enabled_show(struct device *dev,
+				struct device_attribute *attr, char *buf)
+{
+	struct mtk_charger *pinfo = dev->driver_data;
+	int enabled = pinfo->cmd_discharging ? 0 : 1;
+	return sprintf(buf, "%d\n", enabled);
+}
+
+static ssize_t charging_enabled_store(struct device *dev,
+				struct device_attribute *attr,
+				const char *buf, size_t size)
+{
+	struct mtk_charger *pinfo = dev->driver_data;
+	long temp;
+
+	if (kstrtol(buf, 10, &temp) == 0) {
+		if (temp == 0) {
+			pinfo->cmd_discharging = true;
+			g_charging_disabled = true;
+			if (pinfo->chg1_dev) {
+				charger_dev_enable(pinfo->chg1_dev, false);
+				charger_dev_set_charging_current(pinfo->chg1_dev, 0);
+				charger_dev_set_input_current(pinfo->chg1_dev, 0);
+				charger_dev_do_event(pinfo->chg1_dev, EVENT_DISCHARGE, 0);
+			}
+		} else {
+			pinfo->cmd_discharging = false;
+			g_charging_disabled = false;
+			if (pinfo->chg1_dev) {
+				charger_dev_enable(pinfo->chg1_dev, true);
+				charger_dev_do_event(pinfo->chg1_dev, EVENT_RECHARGE, 0);
+			}
+		}
+		_wake_up_charger(pinfo);
+	}
+	return size;
+}
+static DEVICE_ATTR(charging_enabled, 0664, charging_enabled_show, charging_enabled_store);
 
 /* procfs */
 static int mtk_chg_current_cmd_show(struct seq_file *m, void *data)
@@ -1561,22 +1584,10 @@ static int charger_routine_thread(void *arg)
 	unsigned long flags;
 	static bool is_module_init_done;
 	bool is_charger_on;
-        static unsigned long last_run_jiffies = 0;
-        /*The BQ2560X I2C controller on this target device is physically damaged,so i just do some workaround*/
-        while (1) {
-            msleep(10000); 
-        }
 
 	while (1) {
 		wait_event(info->wait_que,
 			(info->charger_thread_timeout == true));
-
-                /* If it ran less than 500ms ago, sleep and skip the heavy logic */
-                if (last_run_jiffies != 0 && time_before(jiffies, last_run_jiffies + msecs_to_jiffies(500))) {
-                        info->charger_thread_timeout = false;
-                        msleep(100);
-                        continue;
-                }
 
 		while (is_module_init_done == false) {
 			if (charger_init_algo(info) == true)
@@ -1671,8 +1682,8 @@ static int charger_pm_event(struct notifier_block *notifier,
 		if (timespec_compare(&now, &info->endtime) >= 0 &&
 			info->endtime.tv_sec != 0 &&
 			info->endtime.tv_nsec != 0) {
-			chr_err("%s: alarm timeout, wake up charger\n",
-				__func__);
+			chr_debug("%s: alarm timeout, wake up charger\n",
+				  __func__);
 			__pm_relax(info->charger_wakelock);
 			info->endtime.tv_sec = 0;
 			info->endtime.tv_nsec = 0;
@@ -1693,10 +1704,10 @@ static enum alarmtimer_restart
 	container_of(alarm, struct mtk_charger, charger_timer);
 
 	if (info->is_suspend == false) {
-		chr_err("%s: not suspend, wake up charger\n", __func__);
+		chr_debug("%s: not suspend, wake up charger\n", __func__);
 		_wake_up_charger(info);
 	} else {
-		chr_err("%s: alarm timer timeout\n", __func__);
+		chr_debug("%s: alarm timer timeout\n", __func__);
 		__pm_stay_awake(info->charger_wakelock);
 	}
 
@@ -1746,6 +1757,10 @@ static int mtk_charger_setup_files(struct platform_device *pdev)
 
 	/* Battery warning */
 	ret = device_create_file(&(pdev->dev), &dev_attr_BatteryNotify);
+	if (ret)
+		goto _out;
+
+	ret = device_create_file(&(pdev->dev), &dev_attr_charging_enabled);
 	if (ret)
 		goto _out;
 
@@ -2156,11 +2171,10 @@ static int mtk_charger_probe(struct platform_device *pdev)
 	}
 
 	info->log_level = CHRLOG_DEBUG_LEVEL;
-        /* commenting this out since my phone has some hw issue
-	info->pd_adapter = get_adapter_by_name("pd_adapter");
 
+	info->pd_adapter = get_adapter_by_name("pd_adapter");
 	if (!info->pd_adapter)
-		chr_err("%s: No pd adapter found\n");
+		chr_err("%s: No pd adapter found\n", __func__);
 	else {
 		info->pd_nb.notifier_call = notify_adapter_event;
 		register_adapter_device_notifier(info->pd_adapter,
@@ -2168,7 +2182,7 @@ static int mtk_charger_probe(struct platform_device *pdev)
 	}
 
 	info->chg_alg_nb.notifier_call = chg_alg_event;
-        */
+
 	kthread_run(charger_routine_thread, info, "charger_thread");
 
 	return 0;
